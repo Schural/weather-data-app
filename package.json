@@ -1,0 +1,15 @@
+{
+  "name": "weather-history",
+  "version": "0.0.1",
+  "description": "Show weather history by given city.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "NZZ",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.17.1",
+    "yargs": "^10.0.3"
+  }
+}
