@@ -36,7 +36,7 @@ if (argv.historical) {
 
     var timeToUnix = argv.historical;
 
-    var weatherUrl = `https://api.darksky.net/forecast/${apiKeys.keys.darkskyAPIKey}/${lat},${lng},${argv.historical}?exclude=currently,minutely,daily,flags`;
+    var weatherUrl = `https://api.darksky.net/forecast/${apiKeys.keys.darkskyAPIKey}/${lat},${lng},${argv.historical}?exclude=currently,minutely,hourly,flags`;
 
     console.log(response.data.results[0].formatted_address);
     return axios.get(weatherUrl);
