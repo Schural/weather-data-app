@@ -1,18 +1,19 @@
 const yargs = require('yargs');
 const axios = require('axios');
+const geoip = require('geoip-lite');
+
 const apiKeys = require('./config.js');
 
 const argv = yargs
   .options({
-    address: {
-      demand: true,
-      alias: 'a',
-      describe: 'Address to fetch weather for',
+    ipaddress: {
+      alias: 'ip',
+      describe: 'IP Address to lookup',
       string: true
     },
-    historical: {
-      alias: 'history',
-      describe: 'Determines if fetched data should be from historical API',
+    date: {
+      alias: 'd',
+      describe: 'Date of order as UNIX timestamp',
       string: true
     }
   })
@@ -20,61 +21,30 @@ const argv = yargs
   .alias('help', 'h')
   .argv;
 
-var encodedAddress = encodeURIComponent(argv.address);
-var geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${apiKeys.keys.googleMapsAPIKey}`;
-
-if (argv.historical) {
-  console.log('Historical: ', argv.historical);
+if (argv.ipaddress && argv.date) {
+  console.log(`Return historical weather from ${argv.ipaddress} on ${new Date(argv.date*1000)}`);
   console.log('--');
-  axios.get(geocodeUrl).then((response) => {
-    if (response.data.status === 'ZERO_RESULTS') {
-      throw new Error('Unable to find that address.');
-    }
 
-    var lat = response.data.results[0].geometry.location.lat;
-    var lng = response.data.results[0].geometry.location.lng;
+  var geo = geoip.lookup(argv.ipaddress);
+  if (geo) {
+    var lat = geo.ll[0];
+    var lng = geo.ll[1];
 
-    var timeToUnix = argv.historical;
+    var weatherUrl = `https://api.darksky.net/forecast/${apiKeys.keys.darkskyAPIKey}/${lat},${lng},${argv.date}?exclude=currently,minutely,hourly,flags`;
+    axios.get(weatherUrl).then((response) => {
+      //console.log(JSON.stringify(response.data, undefined, 2));
+      console.log(`Summary: ${response.data.daily.data[0].summary}`);
+      var temperatureInCelsius = (((response.data.daily.data[0].temperatureMin + response.data.daily.data[0].temperatureMax) / 2 ) - 32 ) * 5 / 9;
+      console.log(`Average Temperature: ${temperatureInCelsius}`);
+    }).catch((e) => {
+      if (e) {
+        console.log(e.message);
+      }
+    });
 
-    var weatherUrl = `https://api.darksky.net/forecast/${apiKeys.keys.darkskyAPIKey}/${lat},${lng},${argv.historical}?exclude=currently,minutely,hourly,flags`;
-
-    console.log(response.data.results[0].formatted_address);
-    return axios.get(weatherUrl);
-  }).then((response) => {
-    //var temperature = response.data.currently.temperature;
-    //var apparentTemperature = response.data.currently.apparentTemperature;
-    console.log(JSON.stringify(response.data, undefined, 2));
-    //console.log(`It's currently ${temperature}. It feels like ${apparentTemperature}.`);
-  }).catch((e) => {
-    if (e.code === 'ENOTFOUND') {
-      console.log('Unable to connect to API servers.')
-    } else {
-      console.log(e.message);
-    }
-  });
+  } else {
+    console.log('not a valid ip');
+  }
 } else {
-  axios.get(geocodeUrl).then((response) => {
-    if (response.data.status === 'ZERO_RESULTS') {
-      throw new Error('Unable to find that address.');
-    }
-
-    var lat = response.data.results[0].geometry.location.lat;
-    var lng = response.data.results[0].geometry.location.lng;
-
-    var weatherUrl = `https://api.darksky.net/forecast/${apiKeys.keys.darkskyAPIKey}/${lat},${lng}`;
-
-
-    console.log(response.data.results[0].formatted_address);
-    return axios.get(weatherUrl);
-  }).then((response) => {
-    var temperature = response.data.currently.temperature;
-    var apparentTemperature = response.data.currently.apparentTemperature;
-    console.log(`It's currently ${temperature}. It feels like ${apparentTemperature}.`);
-  }).catch((e) => {
-    if (e.code === 'ENOTFOUND') {
-      console.log('Unable to connect to API servers.')
-    } else {
-      console.log(e.message);
-    }
-  });
+  console.log('IP or Date not specified.');
 }
