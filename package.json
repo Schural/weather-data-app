@@ -10,8 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.17.1",
+    "fast-csv": "^2.4.1",
     "geoip-lite": "^1.2.1",
-    "maxmind": "^2.4.0",
     "yargs": "^10.0.3"
   }
 }
