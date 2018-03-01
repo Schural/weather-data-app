@@ -9,9 +9,10 @@
   "author": "NZZ",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.17.1",
-    "fast-csv": "^2.4.1",
-    "geoip-lite": "^1.2.1",
-    "yargs": "^10.0.3"
+    "csvtojson": "^1.1.9",
+    "json2csv": "^4.0.0-alpha.0",
+    "limited-request-queue": "^3.0.4",
+    "npm": "^5.6.0",
+    "request": "^2.83.0"
   }
 }
