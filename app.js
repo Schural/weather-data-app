@@ -146,7 +146,7 @@ var queueDarkskyRequests = new RequestQueue(null, {
     console.log("Darksky Request Queue completed!");
     try {
       const csv = json2csv(dataArray);
-      fs.writeFileSync('import_data_without_new_headers2.csv', csv);
+      fs.writeFileSync('testoutput.csv', csv);
     } catch (err) {
       console.error(err);
     }
